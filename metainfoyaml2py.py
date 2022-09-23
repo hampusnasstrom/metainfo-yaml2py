@@ -33,11 +33,6 @@ def yaml2py(yaml_path: str, output_dir: str='') -> None:
 
 def main(sys_args):
     yaml2py(*sys_args[1:])
-    # '/home/hampusnasstrom/repositories/Area_A_application_definitions/PVD/pvd.schema.archive.yaml'
-    # import json
-    # yaml_dict = read_yaml('/home/hampusnasstrom/repositories/Area_A_application_definitions/PVD/pvd.schema.archive.yaml')
-    # # yaml_dict = read_yaml('standard_file_content.yaml')
-    # print(json.dumps(yaml_dict, indent=4))
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or len(sys.argv) > 3:
