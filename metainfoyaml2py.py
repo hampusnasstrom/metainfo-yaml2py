@@ -28,6 +28,9 @@ def yaml2py(yaml_path: str, output_dir: str = '') -> None:
         package_name = yaml_dict.get('name', os.path.basename(
             yaml_path).split('/')[-1].split('.')[0])
         code += content['package_name'] % package_name + '\n'
+        sections = yaml_dict.get('sections', {})
+        for section in sections:
+            code += f"class {section}:\n    pass\n"
         code += content['footer'] + '\n'
         # Clean up the code using autopep8
         cleaned_code = autopep8.fix_code(code, options={'aggressive': 2})
