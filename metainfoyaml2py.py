@@ -32,9 +32,9 @@ def yaml2py(yaml_path: str, output_dir: str='') -> None:
 
 
 def main(sys_args):
+    if len(sys.argv) < 2 or len(sys.argv) > 3:
+        sys.exit("Please provide path to YAML file and optionally path to output directory.")
     yaml2py(*sys_args[1:])
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2 or len(sys.argv) > 3:
-        sys.exit("Please provide path to YAML file and optionally path to output directory.")
     main(sys.argv)
