@@ -1,7 +1,8 @@
-import yaml
-import os
-import autopep8
 import sys
+import os
+import yaml
+import autopep8
+import autoflake
 
 
 def read_yaml(path: str) -> dict:
@@ -37,7 +38,8 @@ def yaml2py(yaml_path: str, output_dir: str = '') -> None:
             code += f"class {section}:\n    '''{description}'''\n    pass\n"
         code += content['footer'] + '\n'
         # Clean up the code using autopep8
-        cleaned_code = autopep8.fix_code(code, options={'aggressive': 2})
+        flake8_cleaned_code = autoflake.fix_code(code, remove_all_unused_imports=True)
+        cleaned_code = autopep8.fix_code(flake8_cleaned_code, options={'aggressive': 2})
         # write the code to file
         file.write(cleaned_code)
 
