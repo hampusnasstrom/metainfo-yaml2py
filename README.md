@@ -1,7 +1,18 @@
 # metainfo-yaml2py
 A program for converting NOMAD metainfo YAML schemas into Python class definitions.
 
-Running on the following YAML file:
+## Installation
+metinfo-yaml2py is currently under development and for installing and contributing you should clone the repository and install the package in editable mode (`-e`) using:
+```
+$ pip install -e .
+```
+You can then run the program with:
+```
+$ metainfo-yaml2py <target file> <output directory>
+```
+
+## Example
+Running `metainfo-yaml2py` on the following YAML file:
 ```yaml
 definitions:
   name: Example
@@ -34,28 +45,17 @@ Will create the follwing python file:
 # limitations under the License.
 #
 
-from nomad.metainfo import (
-    MSection,
-    Package,
-    Quantity,
-    SubSection,
-    MEnum,
-    Reference,
-    Datetime,
-    Section)
-from nomad.datamodel.data import EntryData, ArchiveSection
+from nomad.metainfo import Package
 
 m_package = Package(name='Example')
 
 
 class Activity:
     '''A base class for any activity in relation to an enitity.'''
-    pass
 
 
 class Entity:
     '''A base class for any enitity which can be related to an activity.'''
-    pass
 
 
 m_package.__init_metainfo__()
