@@ -1,10 +1,11 @@
 '''
-metainfoyaml2python module
+metainfoyaml2py module
 '''
 
 import sys
 import os
 import yaml
+import json
 import autopep8
 import autoflake
 
@@ -37,7 +38,14 @@ def parse_quantity(quantity_name: str, quantity_dict: dict) -> str:
         str: The instantiated quantity variable of the parsed quantity as python code.
     '''
     code = ""
-    code += f"{quantity_name} = Quantity(type={quantity_dict['type']})\n"
+    code += f"{quantity_name} = Quantity(type={quantity_dict['type']}"
+    if "description" in quantity_dict:
+        code += ", description=" + "'" + quantity_dict['description'].replace('\n','\\n') + "'"
+    if "m_annotations" in quantity_dict:
+        annotation_dict = quantity_dict["m_annotations"]
+        if "eln" in annotation_dict:
+            code += ", a_eln=" + json.dumps(annotation_dict["eln"])
+    code += ")\n"
     return code
 
 
@@ -105,6 +113,7 @@ def yaml2py(yaml_path: str, output_dir: str = '') -> None:
             flake8_cleaned_code, options={'aggressive': 2})
         # write the code to file
         file.write(cleaned_code)
+        # file.write(code)
 
 
 def main() -> None:
