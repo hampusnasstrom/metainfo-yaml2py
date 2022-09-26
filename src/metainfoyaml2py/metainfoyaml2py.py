@@ -48,12 +48,12 @@ def yaml2py(yaml_path: str, output_dir: str = '') -> None:
         file.write(cleaned_code)
 
 
-def main(sys_args):
+def main():
     if len(sys.argv) < 2 or len(sys.argv) > 3:
         sys.exit(
             "Please provide path to YAML file and optionally path to output directory.")
-    yaml2py(*sys_args[1:])
+    yaml2py(*sys.argv[1:])
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()

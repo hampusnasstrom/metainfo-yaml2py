@@ -16,28 +16,17 @@
 # limitations under the License.
 #
 
-from nomad.metainfo import (
-    MSection,
-    Package,
-    Quantity,
-    SubSection,
-    MEnum,
-    Reference,
-    Datetime,
-    Section)
-from nomad.datamodel.data import EntryData, ArchiveSection
+from nomad.metainfo import Package
 
 m_package = Package(name='Example')
 
 
 class Activity:
     '''A base class for any activity in relation to an enitity.'''
-    pass
 
 
 class Entity:
     '''A base class for any enitity which can be related to an activity.'''
-    pass
 
 
 m_package.__init_metainfo__()
