@@ -20,7 +20,7 @@ definitions:
     Activity:
       description: |
         A base class for any activity in relation to an enitity.
-    quantities:
+      quantities:
         start_time:
           description: |
             The starting date and time of the activity.
