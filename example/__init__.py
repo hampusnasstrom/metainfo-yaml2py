@@ -16,13 +16,16 @@
 # limitations under the License.
 #
 
-from nomad.metainfo import Package
+from nomad.metainfo import Datetime, Package, Quantity
 
 m_package = Package(name='Example')
 
 
 class Activity:
     '''A base class for any activity in relation to an enitity.'''
+    start_time = Quantity(type=Datetime)
+
+    end_time = Quantity(type=Datetime)
 
 
 class Entity:
