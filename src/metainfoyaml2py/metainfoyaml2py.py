@@ -4,6 +4,10 @@ import yaml
 import autopep8
 import autoflake
 
+from pkg_resources import resource_filename
+
+resource_path = resource_filename(__name__, 'resources')
+
 
 def read_yaml(path: str) -> dict:
     """Help function for reading YAML file into dict using pyyaml."""
@@ -18,7 +22,7 @@ def yaml2py(yaml_path: str, output_dir: str = '') -> None:
     except KeyError:
         raise ValueError('No "definitions" key found in YAML file.')
     # Get the standard contents from the 'standard_file_content.yaml' file
-    content = read_yaml('standard_file_content.yaml')
+    content = read_yaml(os.path.join(resource_path, 'standard_file_content.yaml'))
     # Create output file with context manager
     with open(os.path.join(output_dir, '__init__.py'), 'w') as file:
         # Write the file content to string variable `code`
