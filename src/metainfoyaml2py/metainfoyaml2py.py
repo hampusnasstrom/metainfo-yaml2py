@@ -4,8 +4,8 @@ metainfoyaml2py module
 
 import sys
 import os
-import yaml
 import json
+import yaml
 import autopep8
 import autoflake
 
@@ -32,7 +32,8 @@ def parse_quantity(quantity_name: str, quantity_dict: dict) -> str:
 
     Args:
         quantity_name (str): The name of the quantity.
-        quantity_dict (dict): A dictionary representation for the YAML content for the quantity to be parsed.
+        quantity_dict (dict): A dictionary representation for the YAML content for the quantity to
+        be parsed.
 
     Returns:
         str: The instantiated quantity variable of the parsed quantity as python code.
@@ -40,7 +41,8 @@ def parse_quantity(quantity_name: str, quantity_dict: dict) -> str:
     code = ""
     code += f"{quantity_name} = Quantity(type={quantity_dict['type']}"
     if "description" in quantity_dict:
-        code += ", description=" + "'" + quantity_dict['description'].replace('\n','\\n') + "'"
+        code += ", description=" + "'" + \
+            quantity_dict['description'].replace('\n', '\\n') + "'"
     if "m_annotations" in quantity_dict:
         annotation_dict = quantity_dict["m_annotations"]
         if "eln" in annotation_dict:
@@ -54,7 +56,8 @@ def parse_section(section_name: str, section_dict: dict) -> str:
 
     Args:
         section_name (str): The name of the section.
-        section_dict (dict): A dictionary representation of the YAML content for the section to be parsed.
+        section_dict (dict): A dictionary representation of the YAML content for the section to be
+        parsed.
 
     Returns:
         str: The class defintion of the parsed section as python code.
@@ -78,7 +81,8 @@ def yaml2py(yaml_path: str, output_dir: str = '') -> None:
 
     Args:
         yaml_path (str): The path to the YAML file including the `.yaml` extension
-        output_dir (str, optional): The output directory where the `__init__.py` file is saved. Defaults to ''.
+        output_dir (str, optional): The output directory where the `__init__.py` file is saved.
+        Defaults to ''.
 
     Raises:
         ValueError: If the YAML file is not a valid NOMAD metainfo schema.
