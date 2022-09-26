@@ -17,6 +17,7 @@ header: |
     # limitations under the License.
     #
 imports: |
+    import numpy as np
     from nomad.metainfo import MSection, Package, Quantity, SubSection, MEnum, Reference, Datetime, Section
     from nomad.datamodel.data import EntryData, ArchiveSection
 package_name: |    
