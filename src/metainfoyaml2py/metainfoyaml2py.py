@@ -37,12 +37,33 @@ def parse_quantity(quantity_name: str, quantity_dict: dict) -> str:
 
     Returns:
         str: The instantiated quantity variable of the parsed quantity as python code.
+
+    Raises:
+        ValueError: If the YAML file is not a valid NOMAD metainfo schema.
     '''
     code = ""
-    code += f"{quantity_name} = Quantity(type={quantity_dict['type']}"
+    code += f"{quantity_name} = Quantity("
+    try:
+        quantity_type = quantity_dict['type']
+    except KeyError as exc:
+        raise ValueError(f'No "type" key found in quantity {quantity_name}.') from exc
+    if isinstance(quantity_type, dict):
+        if quantity_type['type_kind'] == 'Enum':
+            quantity_type = f"MEnum({quantity_type['type_data']})"
+        else:
+            raise ValueError('Unknown type_kind in quantity.')
+    elif quantity_type == 'string':
+        quantity_type = 'str'
+    elif quantity_type == 'integer':
+        quantity_type = 'int'
+    elif quantity_type == 'boolean':
+        quantity_type = 'bool'
+    code += "type=" + quantity_type
     if "description" in quantity_dict:
         code += ", description=" + "'" + \
             quantity_dict['description'].replace('\n', '\\n') + "'"
+    if "shape" in quantity_dict:
+        code += f", shape={quantity_dict['shape']}"
     if "m_annotations" in quantity_dict:
         annotation_dict = quantity_dict["m_annotations"]
         if "eln" in annotation_dict:
