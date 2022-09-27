@@ -20,6 +20,21 @@ definitions:
     Activity:
       description: |
         A base class for any activity in relation to an enitity.
+      quantities:
+        start_time:
+          description: |
+            The starting date and time of the activity.
+          type: Datetime
+          m_annotations:
+            eln:
+              component: DateTimeEditQuantity
+        end_time:
+          description: |
+            The ending date and time of the activity.
+          type: Datetime
+          m_annotations:
+            eln:
+              component: DateTimeEditQuantity
     Entity:
       description: |
         A base class for any enitity which can be related to an activity.
@@ -52,6 +67,17 @@ m_package = Package(name='Example')
 
 class Activity:
     '''A base class for any activity in relation to an enitity.'''
+    start_time = Quantity(
+        type=Datetime,
+        description='The starting date and time of the activity.\n',
+        a_eln={
+            "component": "DateTimeEditQuantity"})
+
+    end_time = Quantity(
+        type=Datetime,
+        description='The ending date and time of the activity.\n',
+        a_eln={
+            "component": "DateTimeEditQuantity"})
 
 
 class Entity:
