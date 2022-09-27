@@ -64,6 +64,8 @@ def parse_quantity(quantity_name: str, quantity_dict: dict) -> str:
             quantity_dict['description'].replace('\n', '\\n') + "'"
     if "shape" in quantity_dict:
         code += f", shape={quantity_dict['shape']}"
+    if "unit" in quantity_dict:
+        code += f", unit='{quantity_dict['unit']}'"
     if "m_annotations" in quantity_dict:
         annotation_dict = quantity_dict["m_annotations"]
         if "eln" in annotation_dict:
