@@ -9,7 +9,7 @@ definitions:
   # information begins.
   sections:
     # Here we define a section called "Chemical":
-    Chemical:
+    MyChemical:
       # Section definition can have base_sections. Base sections are other schema
       # definition and all properties of these will be inherited.
       base_sections:
@@ -46,7 +46,7 @@ definitions:
           m_annotations:
             eln:
               component: StringEditQuantity
-    Instrument:
+    MyInstrument:
       base_sections:
         - nomad.datamodel.metainfo.eln.Instrument
         - nomad.datamodel.data.EntryData
@@ -58,7 +58,7 @@ definitions:
           m_annotations:
             eln:
               component: ReferenceEditQuantity
-    Sample:
+    MySample:
       m_annotations:
         # The template annotation allows to define what freshly created entries (instances of this schema) will look like.
         # In this example we create a sample with an empty pvd_evaporation process.
