@@ -89,7 +89,7 @@ def parse_quantity(quantity_name: str, quantity_dict: dict) -> str:
         quantity_type = 'int'
     elif quantity_type == 'boolean':
         quantity_type = 'bool'
-    code += "type=" + quantity_type
+    code += "type=" + quantity_type.replace('#/','')
     if "description" in quantity_dict:
         code += ", description=" + "'" + \
             quantity_dict['description'].replace('\n', '\\n') + "'"
@@ -119,14 +119,23 @@ def parse_section(section_name: str, section_dict: dict) -> str:
     for sub_section in sub_sections_dict:
         sub_section_names[sub_section] = _to_camel_case(sub_section)
         sub_section_dict = sub_sections_dict[sub_section]["section"]
-        code += parse_section(section_name=sub_section_names[sub_section],
-                              section_dict=sub_section_dict) + '\n'
+        if isinstance(sub_section_dict, dict):
+            code += parse_section(section_name=sub_section_names[sub_section],
+                                section_dict=sub_section_dict) + '\n'
+        elif sub_section_dict.startswith('nomad'):
+            modules = sub_section_dict.split('.')
+            sub_section_class = modules.pop()
+            code = f'from {".".join(modules)} import {sub_section_class}' + '\n' + code
+            sub_section_names[sub_section] = sub_section_class
+        else:
+            warnings.warn(f"Unable to import subsection: {sub_section}.")
     # Inheritance from base sections
     base_sections = []
     base_section_list = section_dict.pop("base_sections", [])
     if "base_section" in section_dict:
         base_section_list.append(section_dict.pop("base_section"))
     for base_section in base_section_list:
+        base_section = base_section.replace('#/','')
         if not '.' in base_section:
             base_sections.append(base_section)
         elif base_section.startswith('nomad'):
@@ -135,7 +144,7 @@ def parse_section(section_name: str, section_dict: dict) -> str:
             code = f'from {".".join(modules)} import {base_class}' + '\n' + code
             base_sections.append(base_class)
         else:
-            warnings.warn(f"Unable to inherit from referenced base section: {base_sections}.")
+            warnings.warn(f"Unable to inherit from referenced base section: {base_section}.")
     base_classes = ""
     if len(base_sections) > 0:
         base_classes = f"({','.join(base_sections)})"
