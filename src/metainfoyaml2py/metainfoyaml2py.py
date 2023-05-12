@@ -52,10 +52,10 @@ def parse_annotation(section_dict: dict) -> str:
     Returns:
         str: The m_annotations as a str of python variables.
     '''
-    code = ""
+    code = ", "
     for annotation_type, annotation in section_dict.pop("m_annotations", {}).items():
-        code += f", a_{annotation_type}={json.dumps(annotation)}"
-    return code[2:]
+        code += f"a_{annotation_type}={json.dumps(annotation)}, "
+    return code
 
 
 def parse_quantity(quantity_name: str, quantity_dict: dict) -> str:
@@ -97,7 +97,7 @@ def parse_quantity(quantity_name: str, quantity_dict: dict) -> str:
         code += f", shape={quantity_dict['shape']}"
     if "unit" in quantity_dict:
         code += f", unit='{quantity_dict['unit']}'"
-    code += ", " + parse_annotation(quantity_dict) + ")\n"
+    code += parse_annotation(quantity_dict)[-2:] + ")\n"
     return code
 
 
@@ -147,10 +147,12 @@ def parse_section(section_name: str, section_dict: dict) -> str:
     code += f"class {section_name}{base_classes}:\n    '''{description}'''\n    pass\n"
     # Pop quantities
     quantities = section_dict.pop('quantities', {})
-    code += "    m_def = Section(" + parse_annotation(section_dict)
+    code += "    m_def = Section(" + parse_annotation(section_dict)[2:]
     # Add remaining keys in section dictionary as keyword arguments to section definition
     for keyword in section_dict:
-        code += f"{keyword}={json.dumps(section_dict.pop(keyword))}, "
+        code += f"{keyword}={json.dumps(section_dict.get(keyword))}, "
+    if code.endswith(', '):
+        code = code[:-2]
     code += ')\n'
     for quantity in quantities:
         code += '    ' + \
