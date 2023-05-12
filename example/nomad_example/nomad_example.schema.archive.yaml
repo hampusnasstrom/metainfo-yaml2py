@@ -50,7 +50,7 @@ definitions:
       base_sections:
         - nomad.datamodel.metainfo.eln.Instrument
         - nomad.datamodel.data.EntryData
-    Process:
+    MyProcess:
       base_section: nomad.datamodel.metainfo.eln.Process
       quantities:
         instrument:
