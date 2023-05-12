@@ -97,7 +97,7 @@ def parse_quantity(quantity_name: str, quantity_dict: dict) -> str:
         code += f", shape={quantity_dict['shape']}"
     if "unit" in quantity_dict:
         code += f", unit='{quantity_dict['unit']}'"
-    code += parse_annotation(quantity_dict)[-2:] + ")\n"
+    code += parse_annotation(quantity_dict)[:-2] + ")\n"
     return code
 
 

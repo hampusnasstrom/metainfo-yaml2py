@@ -27,12 +27,14 @@ class Activity:
     start_time = Quantity(
         type=Datetime,
         description='The starting date and time of the activity.\n',
-    )
+        a_eln={
+            "component": "DateTimeEditQuantity"})
 
     end_time = Quantity(
         type=Datetime,
         description='The ending date and time of the activity.\n',
-    )
+        a_eln={
+            "component": "DateTimeEditQuantity"})
 
 
 class Entity:

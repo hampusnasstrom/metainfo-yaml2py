@@ -19,7 +19,7 @@ definitions:
   sections:
     Activity:
       description: |
-        A base class for any activity in relation to an enitity.
+        A base class for any activity in relation to an entity.
       quantities:
         start_time:
           description: |
@@ -37,10 +37,10 @@ definitions:
               component: DateTimeEditQuantity
     Entity:
       description: |
-        A base class for any enitity which can be related to an activity.
+        A base class for any entity which can be related to an activity.
 ```
 
-Will create the follwing python file:
+Will create the following python file:
 ```python
 #
 # Copyright The NOMAD Authors.
@@ -60,13 +60,14 @@ Will create the follwing python file:
 # limitations under the License.
 #
 
-from nomad.metainfo import Package
+from nomad.metainfo import Datetime, Package, Quantity, Section
 
 m_package = Package(name='Example')
 
 
 class Activity:
-    '''A base class for any activity in relation to an enitity.'''
+    '''A base class for any activity in relation to an entity.'''
+    m_def = Section()
     start_time = Quantity(
         type=Datetime,
         description='The starting date and time of the activity.\n',
@@ -81,7 +82,8 @@ class Activity:
 
 
 class Entity:
-    '''A base class for any enitity which can be related to an activity.'''
+    '''A base class for any entity which can be related to an activity.'''
+    m_def = Section()
 
 
 m_package.__init_metainfo__()
