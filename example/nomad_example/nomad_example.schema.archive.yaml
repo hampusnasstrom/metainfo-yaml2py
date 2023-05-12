@@ -15,6 +15,7 @@ definitions:
       base_sections:
         - 'nomad.datamodel.metainfo.eln.Chemical'  # Provides typical quantities like name, descriptions, chemical_formula and makes those available for search
         - 'nomad.datamodel.data.EntryData'  # Declares this as a top-level entry section. This determines the types of entries you can create. With this we will be able to create a "Chemical" entry.
+      label: Instrument
       # All definitions, sections, sub_sections, quantities, can provide a description.
       description: |
         This is an example description for Chemical.
@@ -50,11 +51,13 @@ definitions:
       base_sections:
         - nomad.datamodel.metainfo.eln.Instrument
         - nomad.datamodel.data.EntryData
-    Process:
+      label: Instrument
+    MyProcess:
       base_section: nomad.datamodel.metainfo.eln.Process
+      label: Process
       quantities:
         instrument:
-          type: Instrument
+          type: MyInstrument
           m_annotations:
             eln:
               component: ReferenceEditQuantity
@@ -68,6 +71,7 @@ definitions:
       base_sections:
         - 'nomad.datamodel.metainfo.eln.Sample'
         - 'nomad.datamodel.data.EntryData'
+      label: Sample
       quantities:
         name:
           type: str  # The simple string type
@@ -88,7 +92,7 @@ definitions:
             eln:
               component: AutocompleteEditQuantity  # Allows to edit enums with an auto complete text form field
         chemicals:
-          type: Chemical  # Types can also be other sections. This allows to reference a different section.
+          type: MyChemical  # Types can also be other sections. This allows to reference a different section.
           shape: ['*']
           m_annotations:
             eln:
@@ -127,7 +131,7 @@ definitions:
             sub_sections:
               pvd_evaporation:
                 section:
-                  base_sections: ['Process', 'nomad.parsing.tabular.TableData']
+                  base_sections: ['MyProcess', 'nomad.parsing.tabular.TableData']
                   m_annotations:
                     # We can use the eln annotations to put the section to the overview
                     # page, and hide unwanted inherited quantities.
@@ -192,7 +196,7 @@ definitions:
                           y: substrate_temperature
               hotplate_annealing:
                 section:
-                  base_section: Process
+                  base_section: MyProcess
                   m_annotations:
                     # We can use the eln annotations to put the section to the overview
                     # page, and hide unwanted inherited quantities.
