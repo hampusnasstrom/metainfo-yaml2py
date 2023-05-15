@@ -121,23 +121,27 @@ def parse_section(section_name: str, section_dict: dict) -> str:
     '''
     code = ""
     # Recursive definition of subsections
-    sub_section_names = {}
+    sub_sections_code = ''
     sub_sections_dict = section_dict.pop("sub_sections", {})
-    for sub_section in sub_sections_dict:
-        sub_section_names[sub_section] = _to_camel_case(sub_section)
-        sub_section_dict = sub_sections_dict[sub_section]["section"]
-        if isinstance(sub_section_dict, dict):
+    for sub_section, kwargs in sub_sections_dict.items():
+        camel_name = _to_camel_case(sub_section)
+        sub_section_def = kwargs.pop("section")
+        if isinstance(sub_section_def, dict):
             code += parse_section(
-                section_name=sub_section_names[sub_section],
-                section_dict=sub_section_dict,
+                section_name=camel_name,
+                section_dict=sub_section_def,
             ) + '\n'
-        elif sub_section_dict.startswith('nomad'):
-            modules = sub_section_dict.split('.')
-            sub_section_class = modules.pop()
-            code = f'from {".".join(modules)} import {sub_section_class}' + '\n' + code
-            sub_section_names[sub_section] = sub_section_class
+        elif sub_section_def.startswith('nomad'):
+            modules = sub_section_def.split('.')
+            camel_name = modules.pop()
+            code = f'from {".".join(modules)} import {camel_name}' + '\n' + code
         else:
             warnings.warn(f"Unable to import subsection: {sub_section}.")
+        sub_sections_code += f'    {sub_section} = SubSection(section_def={camel_name}'
+        sub_sections_code += parse_annotation(kwargs)[:-2]
+        for keyword, arg in kwargs.items():
+            sub_sections_code += f', {keyword}={json.dumps(arg)}'
+        sub_sections_code += ')\n'
     # Inheritance from base sections
     base_sections = []
     base_section_list = section_dict.pop("base_sections", [])
@@ -175,10 +179,9 @@ def parse_section(section_name: str, section_dict: dict) -> str:
     for quantity in quantities:
         code += '    ' + \
             parse_quantity(quantity_name=quantity,
-                           quantity_dict=quantities[quantity]) + '\n'
+                           quantity_dict=quantities[quantity])
     # Sub section references
-    for variable_name, class_name in sub_section_names.items():
-        code += f'    {variable_name} = SubSection(section_def={class_name})' + '\n'
+    code += sub_sections_code
     return code
 
 
