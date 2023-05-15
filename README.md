@@ -8,7 +8,7 @@ $ pip install -e .
 ```
 You can then run the program with:
 ```
-$ metainfo-yaml2py <target file> <output directory>
+$ metainfo-yaml2py <target file>
 ```
 
 ## Example
@@ -73,7 +73,6 @@ class Activity:
         description='The starting date and time of the activity.\n',
         a_eln={
             "component": "DateTimeEditQuantity"})
-
     end_time = Quantity(
         type=Datetime,
         description='The ending date and time of the activity.\n',
@@ -87,4 +86,22 @@ class Entity:
 
 
 m_package.__init_metainfo__()
+```
+
+## Command Line Interface
+```
+$ metainfo-yaml2py --help
+usage: metainfo-yaml2py [-h] [-o OUTPUT_DIR] [-n] [-p] yaml_path
+
+positional arguments:
+  yaml_path             The path to the YAML schema that should be converted to Python
+                        classes.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -o OUTPUT_DIR, --output_dir OUTPUT_DIR
+                        The path to the output directory of the conversion. Defaults to
+                        the current directory.
+  -n, --normalizers     Add empty normalizers to all class definitions.
+  -p, --plugin          Create all the necessary files for a nomad plugin.
 ```

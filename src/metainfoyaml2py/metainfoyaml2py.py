@@ -2,7 +2,7 @@
 metainfoyaml2py module
 '''
 
-import sys
+import argparse
 import os
 import json
 import warnings
@@ -185,13 +185,18 @@ def parse_section(section_name: str, section_dict: dict) -> str:
     return code
 
 
-def yaml2py(yaml_path: str, output_dir: str = '') -> None:
+def yaml2py(yaml_path: str, output_dir: str = '', normalizers: bool = False,
+            plugin: bool = False) -> None:
     '''Function for parsing a NOMAD metainfo YAML schema into a python file of class definitions.
 
     Args:
         yaml_path (str): The path to the YAML file including the `.yaml` extension
         output_dir (str, optional): The output directory where the `__init__.py` file is saved.
         Defaults to ''.
+        normalizers (bool, optional): Whether to add empty normalizers or not.
+        Defaults to False.
+        plugin (bool, optional): Whether or not to create the files needed for a NOMAD plugin.
+        Defaults to False.
 
     Raises:
         ValueError: If the YAML file is not a valid NOMAD metainfo schema.
@@ -232,15 +237,46 @@ def yaml2py(yaml_path: str, output_dir: str = '') -> None:
             flake8_cleaned_code, options={'aggressive': 2})
         # write the code to file
         file.write(cleaned_code)
+        if normalizers:
+            raise NotImplementedError
+        if plugin:
+            raise NotImplementedError
 
 
 def main() -> None:
     '''Main function for running the metainfo YAML to Python class definition parser.
     '''
-    if len(sys.argv) < 2 or len(sys.argv) > 3:
-        sys.exit(
-            "Please provide path to YAML file and optionally path to output directory.")
-    yaml2py(*sys.argv[1:3])
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'yaml_path',
+        help='The path to the YAML schema that should be converted to Python classes.',
+    )
+    parser.add_argument(
+        '-o',
+        '--output_dir',
+        default='',
+        help=('The path to the output directory of the conversion. '
+              'Defaults to the current directory.'),
+    )
+    parser.add_argument(
+        '-n',
+        '--normalizers',
+        action='store_true',
+        help='Add empty normalizers to all class definitions.',
+    )
+    parser.add_argument(
+        '-p',
+        '--plugin',
+        action='store_true',
+        help='Create all the necessary files for a nomad plugin.',
+    )
+    args = parser.parse_args()
+    yaml2py(
+        yaml_path=args.yaml_path,
+        output_dir=args.output_dir,
+        normalizers=args.normalizers,
+        plugin=args.plugin,
+    )
 
 
 if __name__ == "__main__":
