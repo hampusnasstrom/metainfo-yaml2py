@@ -6,6 +6,8 @@ import sys
 import os
 import json
 import warnings
+import re
+
 import yaml
 import autopep8
 import autoflake
@@ -24,8 +26,14 @@ def _to_camel_case(input_string: str) -> str:
     Returns:
         str: The input converted to CamelCase.
     '''
-    words = input_string.replace("-", " ").replace("_", " ").split()
-    return ''.join(word.capitalize() for word in words)
+    matches = re.finditer(
+        r'.+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)',
+        input_string,
+    )
+    words = []
+    for match in matches:
+        words += match.group(0).replace("-", " ").replace("_", " ").split()
+    return ''.join(word[:1].upper() + word[1:] for word in words)
 
 
 def read_yaml(path: str) -> dict:
@@ -119,8 +127,10 @@ def parse_section(section_name: str, section_dict: dict) -> str:
         sub_section_names[sub_section] = _to_camel_case(sub_section)
         sub_section_dict = sub_sections_dict[sub_section]["section"]
         if isinstance(sub_section_dict, dict):
-            code += parse_section(section_name=sub_section_names[sub_section],
-                                section_dict=sub_section_dict) + '\n'
+            code += parse_section(
+                section_name=sub_section_names[sub_section],
+                section_dict=sub_section_dict,
+            ) + '\n'
         elif sub_section_dict.startswith('nomad'):
             modules = sub_section_dict.split('.')
             sub_section_class = modules.pop()
@@ -203,8 +213,10 @@ def yaml2py(yaml_path: str, output_dir: str = '') -> None:
         sections = yaml_dict.get('sections', {})
         for section in sections:
             section_dict = sections[section]
-            code += parse_section(section_name=section,
-                                  section_dict=section_dict) + '\n'
+            code += parse_section(
+                section_name=section,
+                section_dict=section_dict,
+            ) + '\n'
         code += content['footer'] + '\n'
         code = content['header'] + '\n' + code
         code = code.replace('true', 'True')
@@ -217,7 +229,6 @@ def yaml2py(yaml_path: str, output_dir: str = '') -> None:
             flake8_cleaned_code, options={'aggressive': 2})
         # write the code to file
         file.write(cleaned_code)
-        # file.write(code)
 
 
 def main() -> None:
