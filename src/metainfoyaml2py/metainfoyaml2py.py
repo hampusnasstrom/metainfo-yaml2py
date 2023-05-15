@@ -75,7 +75,7 @@ def parse_quantity(quantity_name: str, quantity_dict: dict) -> str:
     code = ""
     code += f"{quantity_name} = Quantity("
     try:
-        quantity_type = quantity_dict['type']
+        quantity_type = quantity_dict.pop('type')
     except KeyError as exc:
         raise ValueError(f'No "type" key found in quantity {quantity_name}.') from exc
     if isinstance(quantity_type, dict):
@@ -92,12 +92,11 @@ def parse_quantity(quantity_name: str, quantity_dict: dict) -> str:
     code += "type=" + quantity_type.replace('#/','')
     if "description" in quantity_dict:
         code += ", description=" + "'" + \
-            quantity_dict['description'].replace('\n', '\\n') + "'"
-    if "shape" in quantity_dict:
-        code += f", shape={quantity_dict['shape']}"
-    if "unit" in quantity_dict:
-        code += f", unit='{quantity_dict['unit']}'"
-    code += parse_annotation(quantity_dict)[:-2] + ")\n"
+            quantity_dict.pop('description').replace('\n', '\\n') + "'"
+    code += parse_annotation(quantity_dict)[:-2]
+    for keyword, value in quantity_dict.items():
+        code += f", {keyword}={json.dumps(value)}"
+    code += ")\n"
     return code
 
 
