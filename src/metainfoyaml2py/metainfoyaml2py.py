@@ -6,6 +6,8 @@ import sys
 import os
 import json
 import warnings
+import re
+
 import yaml
 import autopep8
 import autoflake
@@ -24,8 +26,14 @@ def _to_camel_case(input_string: str) -> str:
     Returns:
         str: The input converted to CamelCase.
     '''
-    words = input_string.replace("-", " ").replace("_", " ").split()
-    return ''.join(word.capitalize() for word in words)
+    matches = re.finditer(
+        r'.+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)',
+        input_string,
+    )
+    words = []
+    for match in matches:
+        words += match.group(0).replace("-", " ").replace("_", " ").split()
+    return ''.join(word[:1].upper() + word[1:] for word in words)
 
 
 def read_yaml(path: str) -> dict:
@@ -75,7 +83,7 @@ def parse_quantity(quantity_name: str, quantity_dict: dict) -> str:
     code = ""
     code += f"{quantity_name} = Quantity("
     try:
-        quantity_type = quantity_dict['type']
+        quantity_type = quantity_dict.pop('type')
     except KeyError as exc:
         raise ValueError(f'No "type" key found in quantity {quantity_name}.') from exc
     if isinstance(quantity_type, dict):
@@ -89,15 +97,14 @@ def parse_quantity(quantity_name: str, quantity_dict: dict) -> str:
         quantity_type = 'int'
     elif quantity_type == 'boolean':
         quantity_type = 'bool'
-    code += "type=" + quantity_type
+    code += "type=" + quantity_type.replace('#/','')
     if "description" in quantity_dict:
         code += ", description=" + "'" + \
-            quantity_dict['description'].replace('\n', '\\n') + "'"
-    if "shape" in quantity_dict:
-        code += f", shape={quantity_dict['shape']}"
-    if "unit" in quantity_dict:
-        code += f", unit='{quantity_dict['unit']}'"
-    code += parse_annotation(quantity_dict)[:-2] + ")\n"
+            quantity_dict.pop('description').replace('\n', '\\n') + "'"
+    code += parse_annotation(quantity_dict)[:-2]
+    for keyword, value in quantity_dict.items():
+        code += f", {keyword}={json.dumps(value)}"
+    code += ")\n"
     return code
 
 
@@ -114,19 +121,34 @@ def parse_section(section_name: str, section_dict: dict) -> str:
     '''
     code = ""
     # Recursive definition of subsections
-    sub_section_names = {}
+    sub_sections_code = ''
     sub_sections_dict = section_dict.pop("sub_sections", {})
-    for sub_section in sub_sections_dict:
-        sub_section_names[sub_section] = _to_camel_case(sub_section)
-        sub_section_dict = sub_sections_dict[sub_section]["section"]
-        code += parse_section(section_name=sub_section_names[sub_section],
-                              section_dict=sub_section_dict) + '\n'
+    for sub_section, kwargs in sub_sections_dict.items():
+        camel_name = _to_camel_case(sub_section)
+        sub_section_def = kwargs.pop("section")
+        if isinstance(sub_section_def, dict):
+            code += parse_section(
+                section_name=camel_name,
+                section_dict=sub_section_def,
+            ) + '\n'
+        elif sub_section_def.startswith('nomad'):
+            modules = sub_section_def.split('.')
+            camel_name = modules.pop()
+            code = f'from {".".join(modules)} import {camel_name}' + '\n' + code
+        else:
+            warnings.warn(f"Unable to import subsection: {sub_section}.")
+        sub_sections_code += f'    {sub_section} = SubSection(section_def={camel_name}'
+        sub_sections_code += parse_annotation(kwargs)[:-2]
+        for keyword, arg in kwargs.items():
+            sub_sections_code += f', {keyword}={json.dumps(arg)}'
+        sub_sections_code += ')\n'
     # Inheritance from base sections
     base_sections = []
     base_section_list = section_dict.pop("base_sections", [])
     if "base_section" in section_dict:
         base_section_list.append(section_dict.pop("base_section"))
     for base_section in base_section_list:
+        base_section = base_section.replace('#/','')
         if not '.' in base_section:
             base_sections.append(base_section)
         elif base_section.startswith('nomad'):
@@ -135,7 +157,7 @@ def parse_section(section_name: str, section_dict: dict) -> str:
             code = f'from {".".join(modules)} import {base_class}' + '\n' + code
             base_sections.append(base_class)
         else:
-            warnings.warn(f"Unable to inherit from referenced base section: {base_sections}.")
+            warnings.warn(f"Unable to inherit from referenced base section: {base_section}.")
     base_classes = ""
     if len(base_sections) > 0:
         base_classes = f"({','.join(base_sections)})"
@@ -157,10 +179,9 @@ def parse_section(section_name: str, section_dict: dict) -> str:
     for quantity in quantities:
         code += '    ' + \
             parse_quantity(quantity_name=quantity,
-                           quantity_dict=quantities[quantity]) + '\n'
+                           quantity_dict=quantities[quantity])
     # Sub section references
-    for variable_name, class_name in sub_section_names.items():
-        code += f'    {variable_name} = SubSection(section_def={class_name})' + '\n'
+    code += sub_sections_code
     return code
 
 
@@ -195,8 +216,10 @@ def yaml2py(yaml_path: str, output_dir: str = '') -> None:
         sections = yaml_dict.get('sections', {})
         for section in sections:
             section_dict = sections[section]
-            code += parse_section(section_name=section,
-                                  section_dict=section_dict) + '\n'
+            code += parse_section(
+                section_name=section,
+                section_dict=section_dict,
+            ) + '\n'
         code += content['footer'] + '\n'
         code = content['header'] + '\n' + code
         code = code.replace('true', 'True')
@@ -209,7 +232,6 @@ def yaml2py(yaml_path: str, output_dir: str = '') -> None:
             flake8_cleaned_code, options={'aggressive': 2})
         # write the code to file
         file.write(cleaned_code)
-        # file.write(code)
 
 
 def main() -> None:
