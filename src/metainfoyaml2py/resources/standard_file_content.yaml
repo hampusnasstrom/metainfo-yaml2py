@@ -21,8 +21,20 @@ imports: |
     from structlog.stdlib import (
         BoundLogger,
     )
-    from nomad.metainfo import MSection, Package, Quantity, SubSection, MEnum, Reference, Datetime, Section
-    from nomad.datamodel.data import EntryData, ArchiveSection
+    from nomad.metainfo import (
+        MSection, 
+        Package, 
+        Quantity,
+        SubSection,
+        MEnum,
+        Reference,
+        Datetime,
+        Section,
+    )
+    from nomad.datamodel.data import (
+        EntryData, 
+        ArchiveSection,
+    )
 package_name: |    
     m_package = Package(name='%s')
 footer: |
