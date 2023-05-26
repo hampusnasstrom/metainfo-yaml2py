@@ -1,0 +1,4 @@
+plugin_type: schema
+name: Plugin name
+description: |
+  This is a plugin schema generated from a yaml schema.
