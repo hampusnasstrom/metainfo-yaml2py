@@ -6,6 +6,7 @@ import argparse
 import os
 import shutil
 import json
+from typing import Any, Iterable
 import warnings
 import re
 
@@ -20,7 +21,8 @@ resource_path = resource_filename(__name__, 'resources')
 
 
 def _to_camel_case(input_string: str) -> str:
-    '''Help function for converting sub section names to CamelCase.
+    '''
+    Help function for converting sub section names to CamelCase.
 
     Args:
         input_string (str): The input string with space, -, _, or CamelCase for separation.
@@ -39,7 +41,8 @@ def _to_camel_case(input_string: str) -> str:
 
 
 def _to_snake_case(input_string: str) -> str:
-    '''Help function for converting package name to snake_case.
+    '''
+    Help function for converting package name to snake_case.
 
     Args:
         input_string (str): The input string with space, -, _, or CamelCase for separation.
@@ -57,8 +60,32 @@ def _to_snake_case(input_string: str) -> str:
     return '_'.join(word.lower() for word in words)
 
 
+def set_nested(mapping: dict, nested_key: list, value: Any) -> None:
+    '''
+    Helper function for setting a nested value in a dict.
+
+    Args:
+        mapping (dict): The nested dictionary.
+        nested_key (list): A list of the nested keys from outer to inner.
+        value (Any): The value to set.
+
+    Returns:
+        _type_: The nested dictionary with the set value.
+    '''
+    _nested_dict = mapping.copy()
+    _keys = nested_key.copy()
+    key = _keys.pop(0)
+    if len(_keys) == 0:
+        _nested_dict[key] = value
+        return _nested_dict
+    else:
+        _nested_dict[key] = set_nested(_nested_dict.get(key, {}), _keys, value)
+        return _nested_dict
+
+
 def read_yaml(path: str) -> dict:
-    '''Help function for reading YAML file into dict using pyyaml.
+    '''
+    Help function for reading YAML file into dict using pyyaml.
 
     Args:
         path (str): The path to the YAML file including the `.yaml` extension.
@@ -68,7 +95,34 @@ def read_yaml(path: str) -> dict:
     '''
     with open(path, 'r', encoding="utf8") as file:
         return yaml.safe_load(file)
+    
 
+def update_mapping_file(path: str, nested_keys: Iterable[list], values: Iterable) -> None:
+    '''
+    Help function for updating a nested key value in a yaml or toml file.
+
+    Args:
+        path (str): The path to the file.
+        nested_keys (Iterable[list]): An iterable of lists with the nested keys as items.
+        values (Iterable): An iterable of the values corresponding to the keys.
+
+    Raises:
+        ValueError: For unsupported file endings.
+    '''
+    with open(path, 'r', encoding='utf-8') as fh:
+        if path.endswith('.yaml'):
+            mapping = yaml.safe_load(fh)
+        elif path.endswith('.toml'):
+            mapping = toml.load(fh)
+        else:
+            raise ValueError(f'Unsupported file ending for: {path}')
+    for nested_key, value in zip(nested_keys, values):
+        mapping = set_nested(mapping=mapping, nested_key=nested_key, value=value)
+    with open(path, 'w', encoding='utf-8') as fh:
+        if path.endswith('.yaml'):
+            yaml.dump(mapping, fh)
+        elif path.endswith('.toml'):
+            toml.dump(mapping, fh)
 
 def parse_annotation(section_dict: dict) -> str:
     '''
@@ -88,7 +142,8 @@ def parse_annotation(section_dict: dict) -> str:
 
 
 def parse_quantity(quantity_name: str, quantity_dict: dict) -> str:
-    '''Parse the content of metainfo quantity into Python instance.
+    '''
+    Parse the content of metainfo quantity into Python instance.
 
     Args:
         quantity_name (str): The name of the quantity.
@@ -130,7 +185,8 @@ def parse_quantity(quantity_name: str, quantity_dict: dict) -> str:
 
 
 def parse_section(section_name: str, section_dict: dict) -> str:
-    '''Parse the content of a metainfo section into a Python class.
+    '''
+    Parse the content of a metainfo section into a Python class.
 
     Args:
         section_name (str): The name of the section.
@@ -208,37 +264,48 @@ def parse_section(section_name: str, section_dict: dict) -> str:
 
 
 def create_plugin(location: str, package_name: str) -> str:
-    _package_name = _to_snake_case(package_name)
-    plugin_loc = os.path.join(location, _package_name + '_plugin')
+    '''
+    Function for creating a nomad plugin package at a given location.
+
+    Args:
+        location (str): The location where the nomad plugin folder will be created.
+        package_name (str): The name of the package.
+
+    Returns:
+        str: The location with filename where the schema should be placed.
+    '''
+    snake_package_name = _to_snake_case(package_name)
+    plugin_loc = os.path.join(location, snake_package_name + '_plugin')
     shutil.copytree(
         src=os.path.join(resource_path, 'standard_plugin_content'),
         dst=plugin_loc,
     )
     os.rename(
         src=os.path.join(plugin_loc, 'src', 'plugin_name'),
-        dst=os.path.join(plugin_loc, 'src', _package_name),
+        dst=os.path.join(plugin_loc, 'src', snake_package_name),
     )
-    yaml_path = os.path.join(plugin_loc, 'src', _package_name, 'nomad_plugin.yaml')
-    nomad_plugin = read_yaml(yaml_path)
-    nomad_plugin['name'] = package_name
-    with open(yaml_path, 'w', encoding="utf8") as fh:
-        yaml.dump(nomad_plugin, fh)
-    with open(os.path.join(plugin_loc, 'pyproject.toml'), 'r') as fh:
-        pyproject = toml.load(fh)
-    pyproject['project']['name'] = _package_name
-    with open(os.path.join(plugin_loc, 'pyproject.toml'), 'w') as fh:
-        toml.dump(pyproject, fh)
-    yaml_path = os.path.join(plugin_loc, 'nomad.yaml')
-    nomad = read_yaml(yaml_path)
-    nomad['plugins']['options']['schemas/example']['python_package'] = _package_name
-    with open(yaml_path, 'w', encoding="utf8") as fh:
-        yaml.dump(nomad, fh)
-    return os.path.join(plugin_loc, 'src', _package_name, 'schema.py')
+    update_mapping_file(
+        path=os.path.join(plugin_loc, 'src', snake_package_name, 'nomad_plugin.yaml'),
+        nested_keys=(['name'],),
+        values=(package_name,)
+    )
+    update_mapping_file(
+        path=os.path.join(plugin_loc, 'pyproject.toml'),
+        nested_keys=(['project','name'],),
+        values=(snake_package_name,)
+    )
+    update_mapping_file(
+        path=os.path.join(plugin_loc, 'nomad.yaml'),
+        nested_keys=(['plugins','options','schemas/example','python_package'],),
+        values=(snake_package_name,)
+    )
+    return os.path.join(plugin_loc, 'src', snake_package_name, 'schema.py')
 
 
 def yaml2py(yaml_path: str, output_dir: str = '', normalizers: bool = False,
             plugin: bool = False) -> None:
-    '''Function for parsing a NOMAD metainfo YAML schema into a python file of class definitions.
+    '''
+    Function for parsing a NOMAD metainfo YAML schema into a python file of class definitions.
 
     Args:
         yaml_path (str): The path to the YAML file including the `.yaml` extension
@@ -292,13 +359,18 @@ def yaml2py(yaml_path: str, output_dir: str = '', normalizers: bool = False,
                         _to_snake_case(package_name) + '_plugin',
                         'tests'
                     )
-                    with open(os.path.join(test_loc,'data',f'test_{_to_snake_case(section)}.archive.yaml'), 'w') as fh:
+                    test_file = os.path.join(
+                        test_loc,'data',f'test_{_to_snake_case(section)}.archive.yaml'
+                    )
+                    with open(test_file, 'w') as fh:
                         yaml.dump(
-                            {'data': {'m_def': f'{_to_snake_case(package_name)}.{section}'}},
+                            {
+                                'data': {
+                                    'm_def': f'{_to_snake_case(package_name)}.{section}'
+                                }
+                            },
                             fh
                         )
-
-
         code += content['footer'] + '\n'
         code = content['header'] + '\n' + code
         code = code.replace('true', 'True')
@@ -314,7 +386,8 @@ def yaml2py(yaml_path: str, output_dir: str = '', normalizers: bool = False,
 
 
 def main() -> None:
-    '''Main function for running the metainfo YAML to Python class definition parser.
+    '''
+    Main function for running the metainfo YAML to Python class definition parser.
     '''
     parser = argparse.ArgumentParser()
     parser.add_argument(
