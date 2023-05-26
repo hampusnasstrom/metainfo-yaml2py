@@ -26,6 +26,7 @@ dependencies = [
     "autopep8>=1.7.0",
     "autoflake>=1.6.1",
     "PyYAML>=6.0",
+    "toml>=0.10.2",
 ]
 [project.optional-dependencies]
 dev = [

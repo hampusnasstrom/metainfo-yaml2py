@@ -1,5 +1,5 @@
 definitions:
-  name: Example
+  name: Example Schema
   sections:
     Activity:
       description: |

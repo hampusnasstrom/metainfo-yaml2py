@@ -16,6 +16,9 @@
 # limitations under the License.
 #
 
+from structlog.stdlib import (
+    BoundLogger,
+)
 from nomad.metainfo import (
     Package,
     Quantity,
@@ -26,7 +29,7 @@ from nomad.datamodel.data import (
     ArchiveSection,
 )
 
-m_package = Package(name='Example')
+m_package = Package(name='Example Schema')
 
 
 class Activity(ArchiveSection):
@@ -45,12 +48,34 @@ class Activity(ArchiveSection):
         a_eln={
             "component": "DateTimeEditQuantity"})
 
+    def normalize(self, archive, logger: BoundLogger) -> None:
+        '''
+        The normalizer for the `Activity` class.
+
+        Args:
+            archive (EntryArchive): The archive containing the section that is being
+            normalized.
+            logger (BoundLogger): A structlog logger.
+        '''
+        super(Activity, self).normalize(archive, logger)
+
 
 class Entity(ArchiveSection):
     '''
     A base class for any entity which can be related to an activity.
     '''
     m_def = Section()
+
+    def normalize(self, archive, logger: BoundLogger) -> None:
+        '''
+        The normalizer for the `Entity` class.
+
+        Args:
+            archive (EntryArchive): The archive containing the section that is being
+            normalized.
+            logger (BoundLogger): A structlog logger.
+        '''
+        super(Entity, self).normalize(archive, logger)
 
 
 m_package.__init_metainfo__()

@@ -4,10 +4,12 @@ metainfoyaml2py module
 
 import argparse
 import os
+import shutil
 import json
 import warnings
 import re
 
+import toml
 import yaml
 import autopep8
 import autoflake
@@ -21,7 +23,7 @@ def _to_camel_case(input_string: str) -> str:
     '''Help function for converting sub section names to CamelCase.
 
     Args:
-        input_string (str): The input string with space, - or _ for separation.
+        input_string (str): The input string with space, -, _, or CamelCase for separation.
 
     Returns:
         str: The input converted to CamelCase.
@@ -34,6 +36,25 @@ def _to_camel_case(input_string: str) -> str:
     for match in matches:
         words += match.group(0).replace("-", " ").replace("_", " ").split()
     return ''.join(word[:1].upper() + word[1:] for word in words)
+
+
+def _to_snake_case(input_string: str) -> str:
+    '''Help function for converting package name to snake_case.
+
+    Args:
+        input_string (str): The input string with space, -, _, or CamelCase for separation.
+
+    Returns:
+        str: The input converted to snake_case.
+    '''
+    matches = re.finditer(
+        r'.+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)',
+        input_string,
+    )
+    words = []
+    for match in matches:
+        words += match.group(0).replace("-", " ").replace("_", " ").split()
+    return '_'.join(word.lower() for word in words)
 
 
 def read_yaml(path: str) -> dict:
@@ -186,6 +207,35 @@ def parse_section(section_name: str, section_dict: dict) -> str:
     return code
 
 
+def create_plugin(location: str, package_name: str) -> str:
+    _package_name = _to_snake_case(package_name)
+    plugin_loc = os.path.join(location, _package_name + '_plugin')
+    shutil.copytree(
+        src=os.path.join(resource_path, 'standard_plugin_content'),
+        dst=plugin_loc,
+    )
+    os.rename(
+        src=os.path.join(plugin_loc, 'src', 'plugin_name'),
+        dst=os.path.join(plugin_loc, 'src', _package_name),
+    )
+    yaml_path = os.path.join(plugin_loc, 'src', _package_name, 'nomad_plugin.yaml')
+    nomad_plugin = read_yaml(yaml_path)
+    nomad_plugin['name'] = package_name
+    with open(yaml_path, 'w', encoding="utf8") as fh:
+        yaml.dump(nomad_plugin, fh)
+    with open(os.path.join(plugin_loc, 'pyproject.toml'), 'r') as fh:
+        pyproject = toml.load(fh)
+    pyproject['project']['name'] = _package_name
+    with open(os.path.join(plugin_loc, 'pyproject.toml'), 'w') as fh:
+        toml.dump(pyproject, fh)
+    yaml_path = os.path.join(plugin_loc, 'nomad.yaml')
+    nomad = read_yaml(yaml_path)
+    nomad['plugins']['options']['schemas/example']['python_package'] = _package_name
+    with open(yaml_path, 'w', encoding="utf8") as fh:
+        yaml.dump(nomad, fh)
+    return os.path.join(plugin_loc, 'src', _package_name, 'schema.py')
+
+
 def yaml2py(yaml_path: str, output_dir: str = '', normalizers: bool = False,
             plugin: bool = False) -> None:
     '''Function for parsing a NOMAD metainfo YAML schema into a python file of class definitions.
@@ -210,14 +260,18 @@ def yaml2py(yaml_path: str, output_dir: str = '', normalizers: bool = False,
     # Get the standard contents from the 'standard_file_content.yaml' file
     content = read_yaml(os.path.join(
         resource_path, 'standard_file_content.yaml'))
+    # Get the package name, defaults to YAML file name (without
+    # .schema.archive.yaml)
+    file_name = os.path.basename(yaml_path).split("/")[-1]
+    package_name = yaml_dict.get('name', file_name.split('.')[0])
+    if plugin:
+        output_file = create_plugin(output_dir, package_name)
+    else:
+        output_file = os.path.join(output_dir, '__init__.py')
     # Create output file with context manager
-    with open(os.path.join(output_dir, '__init__.py'), 'w', encoding="utf8") as file:
+    with open(output_file, 'w', encoding="utf8") as file:
         # Write the file content to string variable `code`
         code = content['imports'] + '\n'
-        # Get the package name, defaults to YAML file name (without
-        # .schema.archive.yaml)
-        file_name = os.path.basename(yaml_path).split("/")[-1]
-        package_name = yaml_dict.get('name', file_name.split('.')[0])
         code += content['package_name'] % package_name + '\n'
         sections = yaml_dict.get('sections', {})
         for section in sections:
@@ -232,6 +286,19 @@ def yaml2py(yaml_path: str, output_dir: str = '', normalizers: bool = False,
                     content['normalizer'].replace('\n','\n    ') % (section, section) +
                     '\n'
                 )
+                if plugin:
+                    test_loc = os.path.join(
+                        output_dir,
+                        _to_snake_case(package_name) + '_plugin',
+                        'tests'
+                    )
+                    with open(os.path.join(test_loc,'data',f'test_{_to_snake_case(section)}.archive.yaml'), 'w') as fh:
+                        yaml.dump(
+                            {'data': {'m_def': f'{_to_snake_case(package_name)}.{section}'}},
+                            fh
+                        )
+
+
         code += content['footer'] + '\n'
         code = content['header'] + '\n' + code
         code = code.replace('true', 'True')
@@ -244,8 +311,6 @@ def yaml2py(yaml_path: str, output_dir: str = '', normalizers: bool = False,
             flake8_cleaned_code, options={'aggressive': 2})
         # write the code to file
         file.write(cleaned_code)
-        if plugin:
-            raise NotImplementedError
 
 
 def main() -> None:
