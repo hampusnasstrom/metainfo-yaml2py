@@ -4,6 +4,7 @@ definitions:
     Activity:
       description: |
         A base class for any activity in relation to an entity.
+        This docstring can span multiple lines.
       quantities:
         start_time:
           description: |

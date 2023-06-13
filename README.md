@@ -2,24 +2,32 @@
 A program for converting NOMAD metainfo YAML schemas into Python class definitions.
 
 ## Installation
-metinfo-yaml2py is currently under development and for installing and contributing you should clone the repository and install the package in editable mode (`-e`) using:
-```
-$ pip install -e .
+`metainfo-yaml2py` is not yet on PyPI but you can install the latest version using:
+```sh
+pip install git+https://github.com/hampusnasstrom/metainfo-yaml2py.git
 ```
 You can then run the program with:
+
 ```
 $ metainfo-yaml2py <target file>
 ```
 
+### For development
+`metainfo-yaml2py` is currently under development and for installing and contributing you should clone the repository and install the package in editable mode (`-e`) using:
+```
+pip install -e .
+```
+
 ## Example
-Running `metainfo-yaml2py` on the following YAML file:
+Running `metainfo-yaml2py` on the following YAML file (with the `-n` flag):
 ```yaml
 definitions:
-  name: Example
+  name: Example Schema
   sections:
     Activity:
       description: |
         A base class for any activity in relation to an entity.
+        This docstring can span multiple lines.
       quantities:
         start_time:
           description: |
@@ -60,37 +68,84 @@ Will create the following python file:
 # limitations under the License.
 #
 
-from nomad.metainfo import Datetime, Package, Quantity, Section
+from structlog.stdlib import (
+    BoundLogger,
+)
+from nomad.metainfo import (
+    Package,
+    Quantity,
+    Datetime,
+    Section,
+)
+from nomad.datamodel.data import (
+    ArchiveSection,
+)
 
-m_package = Package(name='Example')
+m_package = Package(name='Example Schema')
 
 
-class Activity:
-    '''A base class for any activity in relation to an entity.'''
+class Activity(ArchiveSection):
+    '''
+    A base class for any activity in relation to an entity.
+    This docstring can span multiple lines.
+    '''
     m_def = Section()
     start_time = Quantity(
         type=Datetime,
-        description='The starting date and time of the activity.\n',
+        description='''
+        The starting date and time of the activity.
+        ''',
         a_eln={
-            "component": "DateTimeEditQuantity"})
+            "component": "DateTimeEditQuantity"
+        },
+    )
     end_time = Quantity(
         type=Datetime,
-        description='The ending date and time of the activity.\n',
+        description='''
+        The ending date and time of the activity.
+        ''',
         a_eln={
-            "component": "DateTimeEditQuantity"})
+            "component": "DateTimeEditQuantity"
+        },
+    )
+
+    def normalize(self, archive, logger: BoundLogger) -> None:
+        '''
+        The normalizer for the `Activity` class.
+
+        Args:
+            archive (EntryArchive): The archive containing the section that is being
+            normalized.
+            logger (BoundLogger): A structlog logger.
+        '''
+        super(Activity, self).normalize(archive, logger)
 
 
-class Entity:
-    '''A base class for any entity which can be related to an activity.'''
+class Entity(ArchiveSection):
+    '''
+    A base class for any entity which can be related to an activity.
+    '''
     m_def = Section()
+
+    def normalize(self, archive, logger: BoundLogger) -> None:
+        '''
+        The normalizer for the `Entity` class.
+
+        Args:
+            archive (EntryArchive): The archive containing the section that is being
+            normalized.
+            logger (BoundLogger): A structlog logger.
+        '''
+        super(Entity, self).normalize(archive, logger)
 
 
 m_package.__init_metainfo__()
+
 ```
 
 ## Command Line Interface
-```
-$ metainfo-yaml2py --help
+```sh
+metainfo-yaml2py --help
 usage: metainfo-yaml2py [-h] [-o OUTPUT_DIR] [-n] [-p] yaml_path
 
 positional arguments:
