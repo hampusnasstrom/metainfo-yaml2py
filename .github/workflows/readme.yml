@@ -1,0 +1,15 @@
+name: Embed example code in README
+on: [push]
+jobs:
+  embed-readme-code:
+    runs-on: ubuntu-latest
+    steps:
+      - name: embedding readme
+        uses: tokusumi/markdown-embed-code@v1.0.0
+        with:
+          markdown: "README.md"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          message: "auto commit for embedding"
+          no_change: "No change on Readme."
+          silent: false
+  
