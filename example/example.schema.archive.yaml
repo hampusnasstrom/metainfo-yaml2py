@@ -2,6 +2,7 @@ definitions:
   name: Example Schema
   sections:
     Activity:
+      base_section: nomad.datamodel.data.ArchiveSection
       description: |
         A base class for any activity in relation to an entity.
         This docstring can span multiple lines.
@@ -21,5 +22,6 @@ definitions:
             eln:
               component: DateTimeEditQuantity
     Entity:
+      base_section: nomad.datamodel.data.ArchiveSection
       description: |
         A base class for any entity which can be related to an activity.

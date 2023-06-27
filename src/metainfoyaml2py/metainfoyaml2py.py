@@ -147,8 +147,8 @@ def parse_quantity(quantity_name: str, quantity_dict: dict) -> str:
 
     Args:
         quantity_name (str): The name of the quantity.
-        quantity_dict (dict): A dictionary representation for the YAML content for the quantity to
-        be parsed.
+        quantity_dict (dict): A dictionary representation for the YAML content for the 
+        quantity to be parsed.
 
     Returns:
         str: The instantiated quantity variable of the parsed quantity as python code.
@@ -197,8 +197,8 @@ def parse_section(section_name: str, section_dict: dict) -> str:
 
     Args:
         section_name (str): The name of the section.
-        section_dict (dict): A dictionary representation of the YAML content for the section to be
-        parsed.
+        section_dict (dict): A dictionary representation of the YAML content for the 
+        section to be parsed.
 
     Returns:
         str: The class definition of the parsed section as python code.
@@ -218,7 +218,7 @@ def parse_section(section_name: str, section_dict: dict) -> str:
         elif sub_section_def.startswith('nomad'):
             modules = sub_section_def.split('.')
             camel_name = modules.pop()
-            code = f'from {".".join(modules)} import {camel_name}' + '\n' + code
+            code = f'from {".".join(modules)} import (\n    {camel_name},\n)' + '\n' + code
         else:
             warnings.warn(f"Unable to import subsection: {sub_section}.")
         sub_sections_code += f'    {sub_section} = SubSection(\n'
@@ -243,7 +243,8 @@ def parse_section(section_name: str, section_dict: dict) -> str:
             base_sections.append(base_class)
         else:
             warnings.warn(f"Unable to inherit from referenced base section: {base_section}.")
-    base_sections.append('ArchiveSection')
+    if 'ArchiveSection' not in base_sections:
+        base_sections.append('ArchiveSection')
     base_classes = ""
     if len(base_sections) > 0:
         base_classes = f"({','.join(base_sections)})"
