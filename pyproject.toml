@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "metainfoyaml2py"
-version = "0.0.1"
+version = "0.0.2"
 description = "A program for converting NOMAD metainfo YAML schemas into Python class definitions"
 readme = "README.md"
 requires-python = ">=3.9"
