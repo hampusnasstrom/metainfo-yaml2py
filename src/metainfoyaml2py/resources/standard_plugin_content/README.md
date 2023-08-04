@@ -1,31 +1,17 @@
-# NOMAD's schema example plugin
+# NOMAD's metinfo-yaml2py plugin
 
 ## Getting started
 
-### Fork the project
+### Install your python plugin package
 
-Go to the github project page https://github.com/nomad-coe/nomad-schema-plugin-example, hit
-fork (and leave a star, thanks!). Maybe you want to rename the project while forking!
-
-### Clone your fork
-
-Follow the github instructions. The URL and directory depends on your user name or organization and the
-project name you choose. But, it should look somewhat like this:
-
-```
-git clone git@github.com:markus1978/my-nomad-schema.git
-cd my-nomad-schema
-```
-
-### Install the dependencies
-
-You should create a virtual environment. You will need the `nomad-lab` package (and `pytest`).
+You should create a virtual environment.
 You need at least Python 3.9.
+From the top directory of your plugin you can install it en editable mode with:
 
 ```sh
 python3 -m venv .pyenv
 source .pyenv/bin/activate
-pip install -r requirements.txt --index-url https://gitlab.mpcdf.mpg.de/api/v4/projects/2187/packages/pypi/simple
+pip install -e . --index-url https://gitlab.mpcdf.mpg.de/api/v4/projects/2187/packages/pypi/simple
 ```
 
 **Note!**
@@ -34,12 +20,6 @@ sure to include NOMAD's internal package registry (e.g. via `--index-url`). Foll
 in `requirements.txt`.
 
 ### Run the tests
-
-Make sure the current directory is in your path:
-
-```sh
-export PYTHONPATH=.
-```
 
 You can run automated tests with `pytest`:
 
