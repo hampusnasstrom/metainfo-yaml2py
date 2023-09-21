@@ -41,6 +41,10 @@ dev = [
 [project.scripts]
 metainfo-yaml2py = "metainfoyaml2py.metainfoyaml2py:main"
 
+[project.urls]
+"Homepage" = "https://github.com/hampusnasstrom/metainfo-yaml2py"
+"Bug Tracker" = "https://github.com/hampusnasstrom/metainfo-yaml2py/issues"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
