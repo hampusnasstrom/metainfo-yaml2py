@@ -14,7 +14,7 @@ pip install metainfoyaml2py
 You can then run the program with:
 
 ```
-$ metainfo-yaml2py <target file>
+metainfo-yaml2py <target file>
 ```
 
 ### For development
