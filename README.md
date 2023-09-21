@@ -1,7 +1,7 @@
 ![](https://github.com/FAIRmat-NFDI/pynxtools/actions/workflows/publish.yml/badge.svg)
-![](https://img.shields.io/pypi/pyversions/pynxtools)
-![](https://img.shields.io/pypi/l/pynxtools)
-![](https://img.shields.io/pypi/v/pynxtools)
+![](https://img.shields.io/pypi/pyversions/metainfoyaml2py)
+![](https://img.shields.io/pypi/l/metainfoyaml2py)
+![](https://img.shields.io/pypi/v/metainfoyaml2py)
 
 # metainfo-yaml2py
 A program for converting NOMAD metainfo YAML schemas into Python class definitions.
