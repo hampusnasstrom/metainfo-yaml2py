@@ -11,7 +11,7 @@ dynamic = ["version"]
 description = "A program for converting NOMAD metainfo YAML schemas into Python class definitions"
 readme = "README.md"
 requires-python = ">=3.9"
-license = {file = "LICENSE"}
+license = { text = "Apache-2.0" }
 keywords = ["nomad"]
 authors = [
   {name = "Hampus Näsström", email = "hampus.naesstroem@physik.hu-berlin.de"},
@@ -23,6 +23,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.9",
+    "License :: OSI Approved :: Apache Software License",
 ]
 
 dependencies = [
