@@ -1,10 +1,15 @@
+![](https://github.com/FAIRmat-NFDI/pynxtools/actions/workflows/publish.yml/badge.svg)
+![](https://img.shields.io/pypi/pyversions/pynxtools)
+![](https://img.shields.io/pypi/l/pynxtools)
+![](https://img.shields.io/pypi/v/pynxtools)
+
 # metainfo-yaml2py
 A program for converting NOMAD metainfo YAML schemas into Python class definitions.
 
 ## Installation
-`metainfo-yaml2py` is not yet on PyPI but you can install the latest version using:
+`metainfo-yaml2py` can be installed from PyPI using pip:
 ```sh
-pip install git+https://github.com/hampusnasstrom/metainfo-yaml2py.git
+pip install metainfoyaml2py
 ```
 You can then run the program with:
 
