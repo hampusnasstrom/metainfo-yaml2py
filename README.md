@@ -1,4 +1,4 @@
-![](https://github.com/FAIRmat-NFDI/pynxtools/actions/workflows/publish.yml/badge.svg)
+![](https://github.com/hampusnasstrom/metainfo-yaml2py/actions/workflows/publish.yml/badge.svg)
 ![](https://img.shields.io/pypi/pyversions/metainfoyaml2py)
 ![](https://img.shields.io/pypi/l/metainfoyaml2py)
 ![](https://img.shields.io/pypi/v/metainfoyaml2py)
