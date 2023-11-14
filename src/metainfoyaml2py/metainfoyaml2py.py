@@ -219,6 +219,10 @@ def parse_section(section_name: str, section_dict: dict) -> str:
             modules = sub_section_def.split('.')
             camel_name = modules.pop()
             code = f'from {".".join(modules)} import (\n    {camel_name},\n)' + '\n' + code
+        elif sub_section_def.startswith('#/'):
+            camel_name = sub_section_def[2:]
+        elif '.' not in sub_section_def:
+            camel_name = sub_section_def
         else:
             warnings.warn(f"Unable to import subsection: {sub_section}.")
         sub_sections_code += f'    {sub_section} = SubSection(\n'
