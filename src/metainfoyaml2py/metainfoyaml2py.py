@@ -325,7 +325,7 @@ def yaml2py(yaml_path: str, output_dir: str = '', normalizers: bool = False,
 
     Args:
         yaml_path (str): The path to the YAML file including the `.yaml` extension
-        output_dir (str, optional): The output directory where the `__init__.py` file is saved.
+        output_dir (str, optional): The output directory where the python file is saved.
         Defaults to ''.
         normalizers (bool, optional): Whether to add empty normalizers or not.
         Defaults to False.
@@ -345,12 +345,12 @@ def yaml2py(yaml_path: str, output_dir: str = '', normalizers: bool = False,
         resource_path, 'standard_file_content.yaml'))
     # Get the package name, defaults to YAML file name (without
     # .schema.archive.yaml)
-    file_name = os.path.basename(yaml_path).split("/")[-1]
-    package_name = yaml_dict.get('name', file_name.split('.')[0])
+    file_name = os.path.basename(yaml_path).split("/")[-1].split('.')[0]
+    package_name = yaml_dict.get('name', file_name)
     if plugin:
         output_file = create_plugin(output_dir, package_name)
     else:
-        output_file = os.path.join(output_dir, '__init__.py')
+        output_file = os.path.join(output_dir, f'{file_name}.py')
     # Create output file with context manager
     with open(output_file, 'w', encoding="utf8") as file:
         # Write the file content to string variable `code`
