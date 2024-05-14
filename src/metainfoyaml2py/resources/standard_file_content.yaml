@@ -56,4 +56,4 @@ normalizer: |
             normalized.
             logger (BoundLogger): A structlog logger.
         '''
-        super(%s, self).normalize(archive, logger)
+        super().normalize(archive, logger)

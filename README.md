@@ -131,7 +131,7 @@ class Activity(ArchiveSection):
             normalized.
             logger (BoundLogger): A structlog logger.
         '''
-        super(Activity, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class Entity(ArchiveSection):
@@ -149,7 +149,7 @@ class Entity(ArchiveSection):
             normalized.
             logger (BoundLogger): A structlog logger.
         '''
-        super(Entity, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 m_package.__init_metainfo__()
