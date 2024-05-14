@@ -40,6 +40,7 @@ dev = [
 
 [project.scripts]
 metainfo-yaml2py = "metainfoyaml2py.metainfoyaml2py:main"
+metainfo-py2yaml = "metainfoyaml2py.metainfopy2yaml:main"
 
 [project.urls]
 "Homepage" = "https://github.com/hampusnasstrom/metainfo-yaml2py"
