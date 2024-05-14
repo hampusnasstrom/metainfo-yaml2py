@@ -365,9 +365,7 @@ def yaml2py(yaml_path: str, output_dir: str = '', normalizers: bool = False,
             ) + '\n'
             if normalizers:
                 code += (
-                    '    ' +
-                    content['normalizer'].replace('\n','\n    ') % (section, section) +
-                    '\n'
+                    '    ' + content['normalizer'].replace('\n','\n    ') % section + '\n'
                 )
                 if plugin:
                     test_loc = os.path.join(
