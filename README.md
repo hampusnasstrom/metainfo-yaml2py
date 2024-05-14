@@ -73,8 +73,9 @@ Will create the following python file:
 # limitations under the License.
 #
 
-from structlog.stdlib import (
-    BoundLogger,
+from nomad.datamodel.data import ArchiveSection
+from typing import (
+    TYPE_CHECKING,
 )
 from nomad.metainfo import (
     Package,
@@ -85,6 +86,13 @@ from nomad.metainfo import (
 from nomad.datamodel.data import (
     ArchiveSection,
 )
+if TYPE_CHECKING:
+    from nomad.datamodel.datamodel import (
+        EntryArchive,
+    )
+    from structlog.stdlib import (
+        BoundLogger,
+    )
 
 m_package = Package(name='Example Schema')
 
@@ -114,7 +122,7 @@ class Activity(ArchiveSection):
         },
     )
 
-    def normalize(self, archive, logger: BoundLogger) -> None:
+    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         '''
         The normalizer for the `Activity` class.
 
@@ -132,7 +140,7 @@ class Entity(ArchiveSection):
     '''
     m_def = Section()
 
-    def normalize(self, archive, logger: BoundLogger) -> None:
+    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         '''
         The normalizer for the `Entity` class.
 

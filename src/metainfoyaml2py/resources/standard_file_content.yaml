@@ -18,8 +18,8 @@ header: |
     #
 imports: |
     import numpy as np
-    from structlog.stdlib import (
-        BoundLogger,
+    from typing import (
+        TYPE_CHECKING,
     )
     from nomad.metainfo import (
         MSection, 
@@ -35,12 +35,19 @@ imports: |
         EntryData, 
         ArchiveSection,
     )
+    if TYPE_CHECKING:
+        from nomad.datamodel.datamodel import (
+            EntryArchive,
+        )
+        from structlog.stdlib import (
+            BoundLogger,
+        )
 package_name: |    
     m_package = Package(name='%s')
 footer: |
     m_package.__init_metainfo__()
 normalizer: |
-    def normalize(self, archive, logger: BoundLogger) -> None:
+    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
         '''
         The normalizer for the `%s` class.
 
