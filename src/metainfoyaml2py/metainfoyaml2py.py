@@ -15,9 +15,9 @@ import yaml
 import autopep8
 import autoflake
 
-from pkg_resources import resource_filename
+from importlib.resources import files
 
-resource_path = resource_filename(__name__, 'resources')
+resource_path = str(files(__package__) / 'resources')
 
 
 def _to_camel_case(input_string: str) -> str:
@@ -238,7 +238,7 @@ def parse_section(section_name: str, section_dict: dict) -> str:
         base_section_list.append(section_dict.pop("base_section"))
     for base_section in base_section_list:
         base_section = base_section.replace('#/','')
-        if not '.' in base_section:
+        if '.' not in base_section:
             base_sections.append(base_section)
         elif base_section.startswith('nomad'):
             modules = base_section.split('.')
